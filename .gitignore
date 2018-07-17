@@ -1,2 +1,5 @@
 *.gz
 .cache-*
+client_secret.json
+credentials.json
+spotify_backup*.json
