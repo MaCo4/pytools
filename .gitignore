@@ -1,3 +1,4 @@
+python-ldif/
 *.gz
 .cache-*
 client_secret.json
