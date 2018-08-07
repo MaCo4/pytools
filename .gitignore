@@ -3,4 +3,4 @@ python-ldif/
 .cache-*
 client_secret.json
 credentials.json
-spotify_backup*.json
+spotify_*.json
