@@ -1,3 +1,6 @@
 python-ldif/
 *.gz
 .cache-*
+client_secret.json
+credentials.json
+spotify_*.json
