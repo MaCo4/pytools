@@ -5,20 +5,20 @@ import time
 
 
 def tuplelist_to_dict(tuplelist):
-    _dict = {}
+    dict_ = {}
 
-    for _tuple in tuplelist:
-        key, value = _tuple[0], _tuple[1]
+    for tuple_ in tuplelist:
+        key, value = tuple_[0], tuple_[1]
 
-        if key in _dict:  # There exists a key in the dict already
-            if isinstance(_dict[key], list):  # The value at this key is already a list
-                _dict[key].append(value)
+        if key in dict_:  # There exists a key in the dict already
+            if isinstance(dict_[key], list):  # The value at this key is already a list
+                dict_[key].append(value)
             else:
-                _dict[key] = [_dict[key], value]  # Make a list with the existing value plus the new value
+                dict_[key] = [dict_[key], value]  # Make a list with the existing value plus the new value
         else:
-            _dict[key] = value
+            dict_[key] = value
 
-    return _dict
+    return dict_
 
 
 class HTMLNode:
@@ -103,7 +103,7 @@ def main():
     sauce.feed(testHTML)
     pprint(sauce.dom)
 
-    site = requests.get("https://www.w3.org/TR/html5/syntax.html")
+    site = requests.get("http://www.pollenvarslingen.no/forsiden/Trondelag.aspx")
     bigsite = PrettySauce()
     print("Start parsing bigsite...")
     start = time.time()
