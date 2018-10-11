@@ -13,16 +13,11 @@ def get_track_index():
     global _track_index
 
     if _track_index is None:
+        print('Loading track index...')
         with open('spotify_track_index.json') as file:
             _track_index = json.load(file)
 
     return _track_index
-
-
-def save_track_index():
-    global _track_index
-    with open('spotify_track_index.json', 'w') as file:
-        json.dump(_track_index, file)
 
 
 def is_same_track(track1_id, track2_id):
@@ -38,7 +33,7 @@ def is_same_track(track1_id, track2_id):
 
 def backup_all_playlists(sp: spotipy.Spotify, file=None):
     all_playlists = []
-    all_tracks = {}
+    all_tracks = get_track_index()
     playlists_offset = 0
 
     while True:
@@ -70,6 +65,7 @@ def backup_all_playlists(sp: spotipy.Spotify, file=None):
 
                     current_list['tracks'].append(track_id)
                     if track_id not in all_tracks:
+                        print('Adding new track {} to track index'.format(track['name']))
                         all_tracks[track_id] = {
                             'name': track['name'],
                             'artists': [artist['name'] for artist in track['artists']],
