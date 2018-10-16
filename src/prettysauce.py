@@ -7,9 +7,7 @@ import time
 def tuplelist_to_dict(tuplelist):
     dict_ = {}
 
-    for tuple_ in tuplelist:
-        key, value = tuple_[0], tuple_[1]
-
+    for key, value in tuplelist:
         if key in dict_:  # There exists a key in the dict already
             if isinstance(dict_[key], list):  # The value at this key is already a list
                 dict_[key].append(value)
@@ -110,7 +108,9 @@ def main():
     bigsite.feed(site.text)
     elapsed = time.time() - start
     print("Done parsing bigsite in {} secs".format(elapsed))
-    print(list(map(lambda e: e.type if isinstance(e, HTMLNode) else e, bigsite.dom[0].children[0].children)))
+    # print(list(map(lambda e: e.type if isinstance(e, HTMLNode) else e, bigsite.dom[0].children[0].children)))
+    # This is more pythonic:
+    print([e.type if isinstance(e, HTMLNode) else e for e in bigsite.dom[0].children[0].children])
 
 
 if __name__ == "__main__":
