@@ -123,7 +123,7 @@ def main():
 
     try:
         conf = configparser.ConfigParser()
-        conf.read(('/etc/antler/antler.conf', 'C:\\antler.conf'))
+        conf.read('/etc/antler/antler.conf')
 
         client_id = conf.get('spotify_oauth', 'client_id')
         client_secret = conf.get('spotify_oauth', 'client_secret')
