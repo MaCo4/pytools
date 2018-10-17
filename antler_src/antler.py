@@ -101,7 +101,7 @@ def backup_all_playlists(sp: spotipy.Spotify, file=None):
 
 
 if __name__ == "__main__":
-    token = sputil.prompt_for_user_token(username='spotipy')
+    token = sputil.prompt_for_user_token(username='spotipy', redirect_uri='http://localhost')
 
     sp = spotipy.Spotify(auth=token)
 
