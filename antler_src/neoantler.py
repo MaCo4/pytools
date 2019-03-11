@@ -142,12 +142,12 @@ def main():
         log.setLevel(conf.get('log', 'level', fallback='INFO'))
         formatter = logging.Formatter('%(name)s: [%(levelname)s] %(message)s')
 
-        if conf.get('log', 'stdout', fallback='0').lower() is in ['1', 'true', 'y', 'yes']:
+        if conf.get('log', 'stdout', fallback='0').lower() in ['1', 'true', 'y', 'yes']:
             stdout_handler = logging.StreamHandler(sys.stdout)
             stdout_handler.setFormatter(formatter)
             log.addHandler(stdout_handler)
 
-        if conf.get('log', 'syslog', fallback='0').lower() is in ['1', 'true', 'y', 'yes']:
+        if conf.get('log', 'syslog', fallback='0').lower() in ['1', 'true', 'y', 'yes']:
             syslog_handler = logging.handlers.SysLogHandler(address='/dev/log')
             syslog_handler.setFormatter(formatter)
             log.addHandler(syslog_handler)
