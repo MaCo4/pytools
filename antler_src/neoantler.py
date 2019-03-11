@@ -125,7 +125,6 @@ class NeoAntler:
 
 def main():
     log = logging.getLogger('antler')
-    log.info('Antler started')
 
     try:
         conf = configparser.ConfigParser()
@@ -155,6 +154,8 @@ def main():
     except configparser.Error as ex:
         log.error('Config file error: ' + ex.message)
         sys.exit(1)
+
+    log.info('Antler started')
 
     sp_oauth = spotipy.oauth2.SpotifyOAuth(client_id, client_secret, redirect_uri, scope=scope,
                                            cache_path='/etc/antler/oauth_cache_' + username + '.json')
