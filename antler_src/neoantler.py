@@ -15,6 +15,7 @@ class NeoAntler:
         self.sp = sp
         self.all_playlists = []
         self.all_tracks = {}
+        self._log = logging.getLogger('antler')
 
     def load_track_index(self, filename):
         """
@@ -54,35 +55,39 @@ class NeoAntler:
                     )
                     for playlist_item in playlist_tracks['items']:
                         track = playlist_item['track']
-                        track_id = track['id']
+                        if track:  # Fixed bug; sometimes the Spotify API returns just {'is_local': False, 'track': None}
+                            track_id = track['id']
+                            self._log.debug('Doing track {}'.format(track_id))
 
-                        # Local tracks doesn't have a Spotify ID, so we'll use its Spotify URI as an ID instead
-                        if playlist_item['is_local']:
-                            track_id = track['uri']
+                            # Local tracks doesn't have a Spotify ID, so we'll use its Spotify URI as an ID instead
+                            if playlist_item['is_local']:
+                                track_id = track['uri']
 
-                        current_list['tracks'].append(track_id)
-                        if track_id not in self.all_tracks:
-                            # log.debug('Adding new track {} to track index'.format(track['name']))
-                            self.all_tracks[track_id] = {
-                                'name': track['name'],
-                                'artists': [artist['name'] for artist in track['artists']],
-                                'album': track['album']['name']
-                            }
+                            current_list['tracks'].append(track_id)
+                            if track_id not in self.all_tracks:
+                                self._log.debug('Adding new track {} to track index'.format(track['name']))
+                                self.all_tracks[track_id] = {
+                                    'name': track['name'],
+                                    'artists': [artist['name'] for artist in track['artists']],
+                                    'album': track['album']['name']
+                                }
+                        else:
+                            self._log.warning('API returned None for a track in list {}'.format(current_list['name']))
 
                     if playlist_tracks['next'] is None:
                         break
                     tracks_offset += 100
 
-                log.debug('List {} has {} tracks'.format(current_list['name'], len(current_list['tracks'])))
+                self._log.debug('List {} has {} tracks'.format(current_list['name'], len(current_list['tracks'])))
                 self.all_playlists.append(current_list)
 
             if playlists['next'] is None:
                 break
             playlists_offset += 50
 
-        log.debug('Playlists fetched')
-        log.debug('Total num lists: {}'.format(len(self.all_playlists)))
-        log.debug('Total num unique tracks: {}'.format(len(self.all_tracks)))
+        self._log.debug('Playlists fetched')
+        self._log.debug('Total num lists: {}'.format(len(self.all_playlists)))
+        self._log.debug('Total num unique tracks: {}'.format(len(self.all_tracks)))
 
     def save_track_index(self, filename):
         """
@@ -119,6 +124,7 @@ class NeoAntler:
 
 
 def main():
+    log = logging.getLogger('antler')
     log.info('Antler started')
 
     try:
@@ -133,6 +139,19 @@ def main():
 
         backup_dir = conf.get('backup', 'dir')
 
+        log.setLevel(conf.get('log', 'level', fallback='INFO'))
+        formatter = logging.Formatter('%(name)s: [%(levelname)s] %(message)s')
+
+        if conf.get('log', 'stdout', fallback='0').lower() is in ['1', 'true', 'y', 'yes']:
+            stdout_handler = logging.StreamHandler(sys.stdout)
+            stdout_handler.setFormatter(formatter)
+            log.addHandler(stdout_handler)
+
+        if conf.get('log', 'syslog', fallback='0').lower() is in ['1', 'true', 'y', 'yes']:
+            syslog_handler = logging.handlers.SysLogHandler(address='/dev/log')
+            syslog_handler.setFormatter(formatter)
+            log.addHandler(syslog_handler)
+
     except configparser.Error as ex:
         log.error('Config file error: ' + ex.message)
         sys.exit(1)
@@ -141,13 +160,13 @@ def main():
                                            cache_path='/etc/antler/oauth_cache_' + username + '.json')
     token_info = sp_oauth.get_cached_token()
     if token_info is None:
-        log.warning('No cached Spotify OAuth2 token found')
+        log.critical('No cached Spotify OAuth2 token found')
         auth_url = sp_oauth.get_authorize_url()
-        log.warning('Navigate to: {}'.format(auth_url))
+        log.critical('Navigate to: {}'.format(auth_url))
         response = input('Enter the URL you were redirected to: ')
         code = sp_oauth.parse_response_code(response)
         token_info = sp_oauth.get_access_token(code)
-        log.warning('Token info: {}'.format(token_info))
+        log.critical('Token info: {}'.format(token_info))
         sys.exit(1)
 
     sp = spotipy.Spotify(auth=token_info['access_token'])
@@ -175,16 +194,4 @@ def main():
 
 
 if __name__ == '__main__':
-    log = logging.getLogger('antler')
-    log.setLevel(logging.DEBUG)
-    formatter = logging.Formatter('%(name)s: [%(levelname)s] %(message)s')
-
-    stdout_handler = logging.StreamHandler(sys.stdout)
-    stdout_handler.setFormatter(formatter)
-    log.addHandler(stdout_handler)
-
-    syslog_handler = logging.handlers.SysLogHandler()
-    syslog_handler.setFormatter(formatter)
-    log.addHandler(syslog_handler)
-
     main()
